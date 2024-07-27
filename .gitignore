@@ -1,7 +1,3 @@
-/converted_data
-/input_data
-/csv_polar
-/csv_shape
-/csv_cartesian
+/data
 *.bag
 *.pcd

@@ -51,19 +51,7 @@ def convert_all_csvs_in_folder(input_folder, output_folder):
         
         # Convert the CSV file
         convert_spherical_csv_2_cartesian_csv(csv_file, output_file_path)
-
-
-
-
-
-
-
-
-
-
-
-
-
+        
     # Define the function to generate vertical angles
     # PS: The amount of points per turn sould be multiple of two
 def generate_angles(azimuth_step, zenith_step,steps):
