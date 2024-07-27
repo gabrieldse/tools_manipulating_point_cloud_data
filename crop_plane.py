@@ -2,6 +2,8 @@
 
 import numpy as np
 import open3d as o3d
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 
 if __name__ == "__main__":
 
@@ -10,11 +12,18 @@ if __name__ == "__main__":
     pcd2 = o3d.io.read_point_cloud("/home/sqdr/ROSDOCKER/noetic/src/data_bag/second_take_pcd/1722001459.902050734.pcd")
     print(pcd)
     print(type(pcd))
-    print(np.asarray(pcd.points))
+    p = np.asarray(pcd.points)
+    print(p)
 
-    o3d.visualization.draw_geometries([pcd])
+    # o3d.visualization.draw_geometries([pcd])
+    # o3d.visualization.draw_geometries([pcd,pcd2])
 
-    o3d.visualization.draw_geometries([pcd,pcd2])
+    # MATPLOTLIB plot
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+    #ax.plot(p[:,0],p[:,1],p[:,2])
+    ax.scatter(p[:,0],p[:,1],p[:,2])
+    plt.show()
 
 
 
