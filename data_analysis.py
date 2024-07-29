@@ -3,17 +3,15 @@ import os
 import open3d as o3d
 
 
-def load_point_clouds():
+def load_point_clouds(directory):
     ''' It gets only pcd points from a specific time frame '''
     zero_time = 1722001459.792622566
     start_time = zero_time + 137 # 137
-    end_time = zero_time + 147 # 160
+    end_time = zero_time + 160 # 160
 
     print(f'zero time = {zero_time} ')
     print(f'start time = {start_time} ')
     print(f'end time = {end_time} ')
-
-    directory = "/home/sqdr/ROSDOCKER/noetic/src/data_bag/second_take_pcd/"
 
     point_clouds = []
 
@@ -36,40 +34,23 @@ def load_point_clouds():
     print(f"Loaded {len(point_clouds)} scans!")
     return point_clouds
 
-
-# fuse them
-# o3d.visualization.draw_geometries(point_clouds)
-
-# add posegraph
-
-# crop and save the crop comibned file
-
-# o3d.visualization.draw_geometries_with_editing([point_clouds])
-def merge_points():
-    pcds = load_point_clouds()
+def merge_points(pcds,save_pcd_file_as):
     pcd_combined = o3d.geometry.PointCloud()
     for point_id in range(len(pcds)):
         # pcds[point_id].transform(pose_graph.nodes[point_id].pose)
         pcd_combined += pcds[point_id]
-    pcd_combined_down = pcd_combined.voxel_down_sample()
-    o3d.io.write_point_cloud("plane_1m_137_147.pcd", pcd_combined_down)
+    o3d.io.write_point_cloud(save_pcd_file_as,pcd_combined)
     # o3d.visualization.draw_geometries_with_editing([pcd_combined_down])
 
     return pcd_combined
 
-#  print("Load a polygon volume and use it to crop the original point cloud")
-#     vol = o3d.visualization.read_selection_polygon_volume(
-#         "crop/rectangle.json")
-#     plane = vol.crop_point_cloud(pcd)
-#     o3d.visualization.draw_geometries([chair])
-
-# calculate statistic ()
+pcd_paths = load_point_clouds("/home/sqdr/ROSDOCKER/noetic/src/data_bag/second_take_pcd/")
+save_pcd_file_as="wall_xm_137_167.pcd"
+pcd_combined = merge_points(pcd_paths,save_pcd_file_as)
 
 
-# load_point_clouds()
-# pcd_combined = merge_points()
-pcd = o3d.io.read_point_cloud("plane_1m_137_147.pcd")
-o3d.visualization.draw_geometries_with_editing([pcd])
+# pcd = o3d.io.read_point_cloud(pcd_combined)
+o3d.visualization.draw_geometries_with_editing([pcd_combined])
 # o3d.visualization.crop_point_cloud([pcd])
 # vol = o3d.visualization.read_selection_polygon_volume(
 #         "cropped_test.json")

@@ -11,8 +11,6 @@ pcd = o3d.io.read_point_cloud("data/multiway_registration.pcd")
 # vis.run()  # user picks points to form a polygon
 # vis.destroy_window()
 
-
-
 print("Load a polygon volume and use it to crop the original point cloud")
 vol = o3d.visualization.read_selection_polygon_volume(
     "data.json")

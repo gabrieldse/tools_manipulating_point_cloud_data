@@ -44,7 +44,8 @@ def plot_point_cloud_with_plane(ply_file, a, b, c, d):
 
     plt.show()
 
-def calculate_gaussian_noise(ply_file, a, b, c, d, threshold=0.01):
+# 0.0001 = 1/10 mm
+def calculate_gaussian_noise(ply_file, a, b, c, d, threshold=1):
     # Load the point cloud
     pcd = o3d.io.read_point_cloud(ply_file)
     points = np.asarray(pcd.points)
@@ -62,12 +63,12 @@ def calculate_gaussian_noise(ply_file, a, b, c, d, threshold=0.01):
     if len(distances_within_threshold) > 0:
         mean_distance = np.mean(distances_within_threshold)
         std_distance = np.std(distances_within_threshold)
-        print(f"Mean distance to the plane: {mean_distance:.4f} meters")
-        print(f"Standard deviation (noise) of distances: {std_distance:.4f} meters")
+        print(f"Mean distance to the plane: {100*mean_distance:.4f} centimetres")
+        print(f"Standard deviation (noise) of distances: {100*std_distance:.4f} centimetres")
 
         # Plot the distances
         plt.figure(figsize=(10, 6))
-        plt.hist(distances*100, bins=200, edgecolor='black')
+        plt.hist(distances*100, bins=200, edgecolor='black',density=True)
         plt.title('Distance distribution to the plane at 1m. Scans 137-147 ')
         plt.xlabel('Distance (cm)')
         plt.ylabel('Number of Points')
@@ -81,9 +82,13 @@ def calculate_gaussian_noise(ply_file, a, b, c, d, threshold=0.01):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Plots a point cloud and a specified plane. And calculate the distance distribution to this plane')
     parser.add_argument('file_name', type=str, help='The path to the point cloud file (e.g., plane_1m.ply)')
+    parser.add_argument('a',type=float)
+    parser.add_argument('b',type=float)     
+    parser.add_argument('c',type=float)
+    parser.add_argument('d',type=float)
+
     args = parser.parse_args()
     # ply_file = "plane_1m.ply"  # Replace with your .ply file path
     # a, b, c, d = 1, -0.06, -0.05, -0.90  # Replace with your plane coefficients 137 - 147 values
-    a, b, c, d = 1, -0.05, -0.07, -0.90  # Replace with your plane coefficients
-    plot_point_cloud_with_plane(args.file_name, a, b, c, d)
-    calculate_gaussian_noise(args.file_name, a, b, c, d, threshold=0.01)  # Threshold is 1 cm
+    plot_point_cloud_with_plane(args.file_name, args.a, args.b, args.c, args.d)
+    calculate_gaussian_noise(args.file_name, args.a, args.b, args.c, args.d, threshold=1)  # Threshold is 1 cm

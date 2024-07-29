@@ -6,7 +6,7 @@ def main(file_name):
     pcd = o3d.io.read_point_cloud(file_name)
 
     # Segment the plane
-    plane_model, inliers = pcd.segment_plane(distance_threshold=0.02, ransac_n=3, num_iterations=1000)
+    plane_model, inliers = pcd.segment_plane(distance_threshold=0.02, ransac_n=5, num_iterations=100)
 
     [a, b, c, d] = plane_model
     print(f"Plane equation: {a:.2f}x + {b:.2f}y + {c:.2f}z + {d:.2f} = 0")
