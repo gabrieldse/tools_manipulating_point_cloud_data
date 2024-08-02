@@ -6,6 +6,8 @@ import subprocess
 import open3d as o3d
 import numpy as np
 import matplotlib.pyplot as plt
+from scipy.stats import norm
+import matplotlib.mlab as mlab
 
 
 def load_point_clouds(directory):
@@ -39,9 +41,17 @@ def load_point_clouds(directory):
     print(f"Loaded {len(point_clouds)} scans!")
     return point_clouds
 
-def crop_bag_time_clouds(direction=0,time=5,directory="/home/sqdr/Desktop/unilidar_proj/tool_manipulating_point_cloud/pcd/P23_71.9_vert"):
-    zero_time = 1722585852.499159336 # name of the first file
-    final_time = 1722585928.234170198 # name of the last file - pcd
+def crop_pcd_files_within_interval(direction=0,time=5,directory="/home/sqdr/Desktop/unilidar_proj/tool_manipulating_point_cloud/pcd/P23_71.9_vert"):
+    
+    # get first and last time
+    file_names = [f for f in os.listdir(directory) if f.endswith(".pcd")]
+    # print(f'debug file names: {file_names}')
+    sorted_file_names = sorted(file_names)     # Sort filenames in ascending order
+    # print(f'sorted file names: {sorted_file_names}')
+    first_file = sorted_file_names[0]
+    last_file = sorted_file_names[-1]
+    zero_time = int(first_file.split('.')[0]) # name of the first file
+    final_time = int(last_file.split('.')[0]) # name of the last file - pcd
     # start_time = zero_time + 138 # 137
     # end_time = zero_time + 145 # 160
 
@@ -99,6 +109,8 @@ def merge_points(pcd_paths,save_pcd_file_as):
     return pcd_combined
 
 def plot_point_cloud_with_plane(ply_file, a, b, c, d):
+    print(f'---------- {ply_file}---------------------')
+    
     # Load the point cloud using Open3D
     pcd = o3d.io.read_point_cloud(ply_file)
     points = np.asarray(pcd.points)
@@ -137,9 +149,11 @@ def plot_point_cloud_with_plane(ply_file, a, b, c, d):
     ax.set_zlim(mid_z - max_range / 2, mid_z + max_range / 2)
 
     plt.show()
+    
 
 # 0.0001 = 1/10 mm
 def calculate_gaussian_noise(ply_file, a, b, c, d, threshold=1):
+    
     # Load the point cloud
     pcd = o3d.io.read_point_cloud(ply_file)
     points = np.asarray(pcd.points)
@@ -158,12 +172,19 @@ def calculate_gaussian_noise(ply_file, a, b, c, d, threshold=1):
         mean_distance = np.mean(distances_within_threshold)
         std_distance = np.std(distances_within_threshold)
         print(f"Mean distance to the plane: {100*mean_distance:.4f} centimetres")
-        print(f"Standard deviation (noise) of distances: {100*std_distance:.4f} centimetres")
+        print(f"Standard deviation (noise) of distances: {std_distance:.4f} ***** value ")
+        
+        # TODO fit a gaussian
+        # bins = np.linspace(0,1,200)
+        # (mu, sigma) = norm.fit(distances_within_threshold)
+        # y = norm.pdf( bins, mu, sigma)
+        # plt.figure(figsize=(10, 6))
+        # l = plt.plot(bins/ 100, y, 'r--', linewidth=3)
 
+        print(f'------------------------------------------------------------------------------------')
         # Plot the distances
-        plt.figure(figsize=(10, 6))
-        plt.hist(distances*100, bins=200, edgecolor='black',density=True)
-        plt.title('Distance distribution to the plane at 1m. Scans 137-147 ')
+        plt.hist(distances*100, bins=100, edgecolor='black',density=True)
+        plt.title(f' {ply_file} ')
         plt.xlabel('Distance (cm)')
         plt.ylabel('Number of Points')
         plt.grid(True)
@@ -183,56 +204,84 @@ def calculate_gaussian_noise(ply_file, a, b, c, d, threshold=1):
 
 bag_folder = 'filtered_data/bag'
 bag_reindexed_folder = 'filtered_data/bag/reindexed'
-pcd_folder = 'filtered_data/pcd'
+pcd_directory = 'filtered_data/pcd'
+pcd_combined_folder = 'filtered_data/pcd_combined'
+ply_directory = "filtered_data/ply"
 
 
-file_names = [f for f in os.listdir(bag_folder) if f.endswith('.bag.active')] 
-file_names_without_extension = [f.replace('.bag.active', '') for f in file_names]
+# file_names = [f for f in os.listdir(bag_folder) if f.endswith('.bag.active')] 
+# file_names_without_extension = [f.replace('.bag.active', '') for f in file_names]
 
-for name in file_names_without_extension:
-    f_path_full = os.path.join(bag_folder, name + '.bag.active') 
-    f_path_bag_reindexed= os.path.join(bag_reindexed_folder, name + '.bag.active')
-    pcd_file_path = os.path.join(pcd_folder,name)
+# for name in file_names_without_extension:
+#     f_path_full = os.path.join(bag_folder, name + '.bag.active') 
+#     f_path_bag_reindexed= os.path.join(bag_reindexed_folder, name + '.bag.active')
+#     pcd_file_path = os.path.join(pcd_directory,name)
     
-    cmd_reindex_n_fix = f'''source /opt/ros/noetic/setup.bash && rosbag reindex --output-dir={bag_reindexed_folder} {f_path_full} '''
-    cmd_convert = f'''source /opt/ros/noetic/setup.bash && rosrun pcl_ros bag_to_pcd {f_path_bag_reindexed} /unilidar/cloud {os.path.join(pcd_file_path,name)}'''
-    try:
-        subprocess.run(cmd_reindex_n_fix, shell=False, check=True, executable='/bin/bash')
-        subprocess.run(cmd_convert, shell=False, check=True, executable='/bin/bash')
+#     cmd_reindex_n_fix = f'''source /opt/ros/noetic/setup.bash && rosbag reindex --output-dir={bag_reindexed_folder} {f_path_full} '''
+#     cmd_convert = f'''source /opt/ros/noetic/setup.bash && rosrun pcl_ros bag_to_pcd {f_path_bag_reindexed} /unilidar/cloud {os.path.join(pcd_file_path)}'''
+#     try:
+#         subprocess.run(cmd_reindex_n_fix, shell=True, check=True, executable='/bin/bash')
+#         subprocess.run(cmd_convert, shell=True, check=True, executable='/bin/bash')
         
-    except subprocess.CalledProcessError as e:
-        print(f"Error running command for {name}: {e}")
+#     except subprocess.CalledProcessError as e:
+#         print(f"Error running command for {name}: {e}")
     
-print("All commands executed.")
+# print("All .bag converted to .pcd successfully.")
 
-# ---------------- PCD  to PLY -------------------------
+# ----------------  Multiple PCDs to  Combined PCD -------------------------
 
-# list of pcds to PCD combined
-pcd_paths =  crop_bag_time_clouds(0,5,"/home/sqdr/Desktop/unilidar_proj/tool_manipulating_point_cloud/pcd/P23_71.9_vert")
-print(pcd_paths)
-save_pcd_file_as="/home/sqdr/Desktop/unilidar_proj/tool_manipulating_point_cloud/pcd/vertical_P23_71.9_KLX.pcd"
-pcd_combined = merge_points(pcd_paths,save_pcd_file_as)
-print(f"pcd_combined : {pcd_combined}")
+'''
+Fuse diferent frames 
+'''
 
-# To manual crop:
-# pcd = o3d.io.read_point_cloud("/home/sqdr/Desktop/unilidar_proj/tool_manipulating_point_cloud/pcd/vertical_P23_71.9_KLX.pcd")
-# o3d.visualization.draw_geometries_with_editing([pcd_combined])
+# pcd_directories= [f for f in os.listdir(pcd_directory)] 
+# # file_names_without_extension = [f.replace('.bag.active', '') for f in file_names]
 
-# re coppy the name of the pcd to save the file
-# remove the path_ply/same_name.json
+# # list of pcds to PCD combined
+# pcd_combined_path_list = []
+
+# for pcd_data in pcd_directories:
+#     file_names = [f for f in os.listdir(os.path.join(pcd_directory,pcd_data)) ]
+#          # print(f'debug file names: {file_names}')
+#     selected_frames =  crop_pcd_files_within_interval(direction=0,time=5,directory=os.path.join(pcd_directory,pcd_data))
+#     save_pcd_file_as=os.path.join(pcd_combined_folder, pcd_data + '.pcd')
+#     combined_pcd = merge_points(selected_frames,save_pcd_file_as)
+#     pcd_combined_path_list.append(save_pcd_file_as)
+    
+# print(f"combined pcd : {pcd_combined_path_list}")
+
+
+# ------------------------ MANUAL CROP ----------------------------------
+# '''
+# TOdooo
+# '''
+
+# pcd_combined_folder_files= [f for f in os.listdir(pcd_combined_folder)] 
+# print(pcd_combined_folder_files)
+# for pcd_combined_file in pcd_combined_folder_files:
+#     pcd = o3d.io.read_point_cloud(os.path.join(pcd_combined_folder,pcd_combined_file))
+#     print(f'Currently selecting : {pcd_combined_file}. Copy this name before saving it as .ply in the correct directory {ply_directory}')
+#     o3d.visualization.draw_geometries_with_editing([pcd])
+
+# print("Finished cropping all the selected data.")
 
 # -------------------- FIND PLANE and PLOT Noise distribution ------------------------------
-            # ply_file_name = "ply/P23_71.9_vert.ply"
-            # ply = o3d.io.read_point_cloud("ply/P23_71.9_vert.ply")
-            # print(ply)
 
-            # # Segment the plane TODO - change name of graph
-            # plane_model, inliers = ply.segment_plane(distance_threshold=0.02, ransac_n=5, num_iterations=100)
+ply_files = [f for f in os.listdir(ply_directory)] 
+print(ply_files)
+for ply_file in ply_files:
+    ply_file_name = os.path.join(ply_directory,ply_file)
+    ply = o3d.io.read_point_cloud(ply_file_name)
+    # ply_file_name = "ply/P23_71.9_vert.ply"
+    # ply = o3d.io.read_point_cloud("ply/P23_71.9_vert.ply")
+    print(ply)
 
-            # [a, b, c, d] = plane_model
-            # print(f"Plane equation: {a:.2f}x + {b:.2f}y + {c:.2f}z + {d:.2f} = 0")
-            # plot_point_cloud_with_plane(ply_file_name, a, b, c, d)
-            # calculate_gaussian_noise(ply_file_name, a, b, c, d, threshold=1)  # Threshold is 1 cm
+    # Segment the plane TODO - change name of graph
+    plane_model, inliers = ply.segment_plane(distance_threshold=0.02, ransac_n=3, num_iterations=100) # 0.02 = 2 cm
+    [a, b, c, d] = plane_model
+    print(f"Plane equation: {a:.2f}x + {b:.2f}y + {c:.2f}z + {d:.2f} = 0")
+    plot_point_cloud_with_plane(ply_file_name, a, b, c, d)
+    calculate_gaussian_noise(ply_file_name, a, b, c, d, threshold=1)  # Threshold is 1 cm
 
 #ref next approach
 #ref como talvez usa pose graph https://www.open3d.org/docs/latest/tutorial/Advanced/multiway_registration.html
