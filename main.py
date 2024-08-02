@@ -5,19 +5,6 @@ from mpl_toolkits.mplot3d import Axes3D
 import os
 
 
-# Analyse Data
-
-# Select frames
-    # .bag to .pcd
-
-# Merge pcd's
-
-# Crop plane
-
-
-# Perform plane analysis (find gaussian noise and plot it)
-
-
 
 class PointCloudAnimator:
     def __init__(self, pdc_files):
@@ -86,16 +73,23 @@ class PointCloudAnimator:
             self.update_plot(store_state=0)
 
 
-def crop_bag_time_clouds(voxel_size=0.0):
-    zero_time = 1722001459.792622566
-    start_time = zero_time + 138 # 137
-    end_time = zero_time + 145 # 160
+def crop_bag_time_clouds(direction=0,time=5,directory="/home/sqdr/Desktop/unilidar_proj/tool_manipulating_point_cloud/rosbag"):
+    zero_time = 1722585852.499159336 # name of the first file
+    final_time = 1722585928.234170198 # name of the last file - pcd
+    # start_time = zero_time + 138 # 137
+    # end_time = zero_time + 145 # 160
+
+    if direction == 0:
+        # decreasing order
+        start_time = final_time
+        final_time = final_time - time
+    elif direction == 1:
+        start_time = zero_time
+        final_time = zero_time + time
 
     print(f'zero time = {zero_time} ')
     print(f'start time = {start_time} ')
-    print(f'end time = {end_time} ')
-
-    directory = "/home/sqdr/ROSDOCKER/noetic/src/data_bag/second_take_pcd/"
+    print(f'end time = {final_time} ')
 
     point_clouds = [] # list of pointclouds in the selected time interval
 
@@ -107,7 +101,7 @@ def crop_bag_time_clouds(voxel_size=0.0):
         if file_name.endswith(".pcd"):
             try:
                 prefix = float(file_name.split('.')[0])
-                if start_time <= prefix <= end_time:
+                if start_time <= prefix <= final_time:
                     # Construct the full file path
                     file_path = os.path.join(directory, file_name)
                     # Read the point cloud
@@ -132,11 +126,21 @@ def main(pdc_files):
 
 if __name__ == "__main__":
     # List of .pdc files (replace with your actual file paths)
-    pdc_files = crop_bag_time_clouds()
+    pcd_files = crop_bag_time_clouds()
+    pcd = o3d.io.read_point_cloud([pcd_files])
+
+    # Visualize and create a SelectionPolygonVolume
+    vis = o3d.visualization.VisualizerWithEditing()
+    vis.create_window()
+    vis.add_geometry(pcd)
+    vis.run()  # user picks points to form a polygon
+    vis.destroy_window()
+    cropped = o3d.visualization.draw_geometries_with_editing([pcd_files])
+
     # pdc_files = ["1722001459.792622566.pcd","1722001459.902050734.pcd","1722001460.020745754.pcd"]
     
     # Run the interactive plot
-    main(pdc_files)
+    # main(pdc_files)
 
 # if __name__ == "__main__":
 #     # List of .pdc files (replace with your actual file paths)
