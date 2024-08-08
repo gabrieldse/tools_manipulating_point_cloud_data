@@ -9,9 +9,15 @@ def process_file(file_path, skip_points):
     data = pd.read_csv(file_path, delimiter=',')
 
     # Extract columns
-    time = data['Time/s']
-    azimuth = data['Azimuth/deg']
-    zenith = data['Zenith/deg']
+    if 'Time/s' in data.columns:
+        time = data['Time/s']
+        azimuth = data['Azimuth/deg']
+        zenith = data['Zenith/deg']
+    else:
+        time = data['x']
+        azimuth = data['y']
+        zenith = data['z']
+        
 
     # Function to update the plot with skipped points
     def update_plot(skip_points):
@@ -30,13 +36,13 @@ def process_file(file_path, skip_points):
         ax.set_zlabel('Zenith/deg')
 
         # Set the limits for the axes based on the data
-        # ax.set_xlim([time.min(), time.max()])
-        # ax.set_ylim([azimuth.min(), azimuth.max()])
-        # ax.set_zlim([zenith.min(), zenith.max()])
+        ax.set_xlim([time.min(), time.max()])
+        ax.set_ylim([azimuth.min(), azimuth.max()])
+        ax.set_zlim([zenith.min(), zenith.max()])
 
-        ax.set_xlim([-10, +10])
-        ax.set_ylim([-10, +10])
-        ax.set_zlim([0, +10])
+        # ax.set_xlim([-10, +10])
+        # ax.set_ylim([-10, +10])
+        # ax.set_zlim([0, +20])
 
         # Initialize the point cloud
         point_cloud, = ax.plot([], [], [], 'ro')
