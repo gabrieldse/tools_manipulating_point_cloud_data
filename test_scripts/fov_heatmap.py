@@ -32,10 +32,8 @@ rows, cols =  314,1257
 fov_2d_array = np.zeros((rows, cols))
 # print(np.shape(fov_2d_array))
 
-# reminder pandas start at 0 and np array also
+# reminder: pandas and np start counting at 0
 i = 0
-
-
 scan_points_total = 2160*5
 for j in range (1,93):
     scan_points_total = 2160*j
@@ -68,26 +66,8 @@ for j in range (1,93):
         plt.colorbar()  # Optional: Adds a color bar to the side
         plt.title('2D Array as Image')
 
-        
-
-
-
-
 plt.figure()
 plt.imshow(fov_2d_array, cmap='hot')  # You can use different colormaps
 plt.colorbar()  # Optional: Adds a color bar to the side
 plt.title(f'Final plot after {j} scans ')
 plt.show()
-
-
-
-
-
-# 0-360 / pas (x mrad) hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
-# 0 90 / pas (x mrad) 
-
-# iterrate all poits and after division incremenet
-
-# store array status after 1 scann (20000 ) points
-
-# print array.
