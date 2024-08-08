@@ -66,6 +66,7 @@ def convert_all_csvs_in_folder(input_folder, output_folder):
 
     # Define the function to generate vertical angles
     # PS: The amount of points per turn sould be multiple of two
+
 def generate_vertical_angles(azimuth_steps_number, zenith_step_number,round_numbers):
     data = []
     data2 = [1]

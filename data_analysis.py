@@ -108,6 +108,46 @@ def merge_points(pcd_paths,save_pcd_file_as):
 
     return pcd_combined
 
+def combine_point_clouds_with_intensity(pcd_paths, save_pcd_file_as):
+    pcd_combined = o3d.geometry.PointCloud()
+
+    # Initialize lists to hold combined points and intensities
+    combined_points = []
+    combined_intensities = []
+
+    for pcd_path in pcd_paths:
+        # Read the current point cloud
+        current_pcd = o3d.io.read_point_cloud(pcd_path)
+
+        # Extract points and intensities
+        points = np.asarray(current_pcd.points)
+        intensities = np.asarray(current_pcd.colors)[:, 0]  # Assuming intensity is stored in color's red channel
+
+        # Append points and intensities
+        combined_points.append(points)
+        combined_intensities.append(intensities)
+
+    # Concatenate all points and intensities
+    combined_points = np.vstack(combined_points)
+    combined_intensities = np.concatenate(combined_intensities)
+
+    # Create a new point cloud and assign the combined points
+    pcd_combined.points = o3d.utility.Vector3dVector(combined_points)
+
+    # Handle intensity. Here, simply taking the average intensity for overlapping points.
+    if combined_intensities.size > 0:
+        # Assuming intensity is stored in the color channels (RGB)
+        combined_colors = np.zeros((combined_points.shape[0], 3))
+        combined_colors[:, 0] = combined_intensities  # Assuming intensity in red channel
+        combined_colors[:, 1] = combined_intensities  # Replicate for green and blue channels if needed
+        combined_colors[:, 2] = combined_intensities
+        pcd_combined.colors = o3d.utility.Vector3dVector(combined_colors)
+
+    # Save the combined point cloud
+    o3d.io.write_point_cloud(save_pcd_file_as, pcd_combined)
+
+    return pcd_combined
+
 def plot_point_cloud_with_plane(ply_file, a, b, c, d):
     print(f'---------- {ply_file}---------------------')
     
@@ -251,6 +291,7 @@ Fuse diferent frames
 # print(f"combined pcd : {pcd_combined_path_list}")
 
 
+
 # ------------------------ MANUAL CROP ----------------------------------
 # '''
 # TOdooo
@@ -267,21 +308,21 @@ Fuse diferent frames
 
 # -------------------- FIND PLANE and PLOT Noise distribution ------------------------------
 
-ply_files = [f for f in os.listdir(ply_directory)] 
-print(ply_files)
-for ply_file in ply_files:
-    ply_file_name = os.path.join(ply_directory,ply_file)
-    ply = o3d.io.read_point_cloud(ply_file_name)
-    # ply_file_name = "ply/P23_71.9_vert.ply"
-    # ply = o3d.io.read_point_cloud("ply/P23_71.9_vert.ply")
-    print(ply)
+# ply_files = [f for f in os.listdir(ply_directory)] 
+# print(ply_files)
+# for ply_file in ply_files:
+#     ply_file_name = os.path.join(ply_directory,ply_file)
+#     ply = o3d.io.read_point_cloud(ply_file_name)
+#     # ply_file_name = "ply/P23_71.9_vert.ply"
+#     # ply = o3d.io.read_point_cloud("ply/P23_71.9_vert.ply")
+#     print(ply)
 
-    # Segment the plane TODO - change name of graph
-    plane_model, inliers = ply.segment_plane(distance_threshold=0.02, ransac_n=3, num_iterations=100) # 0.02 = 2 cm
-    [a, b, c, d] = plane_model
-    print(f"Plane equation: {a:.2f}x + {b:.2f}y + {c:.2f}z + {d:.2f} = 0")
-    plot_point_cloud_with_plane(ply_file_name, a, b, c, d)
-    calculate_gaussian_noise(ply_file_name, a, b, c, d, threshold=1)  # Threshold is 1 cm
+#     # Segment the plane TODO - change name of graph
+#     plane_model, inliers = ply.segment_plane(distance_threshold=0.02, ransac_n=3, num_iterations=100) # 0.02 = 2 cm
+#     [a, b, c, d] = plane_model
+#     print(f"Plane equation: {a:.2f}x + {b:.2f}y + {c:.2f}z + {d:.2f} = 0")
+#     plot_point_cloud_with_plane(ply_file_name, a, b, c, d)
+#     calculate_gaussian_noise(ply_file_name, a, b, c, d, threshold=1)  # Threshold is 1 cm
 
 #ref next approach
 #ref como talvez usa pose graph https://www.open3d.org/docs/latest/tutorial/Advanced/multiway_registration.html

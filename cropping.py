@@ -2,8 +2,6 @@ import open3d as o3d
 
 pcd = o3d.io.read_point_cloud("data/multiway_registration.pcd")
 
-
-
 # Visualize and create a SelectionPolygonVolume
 # vis = o3d.visualization.VisualizerWithEditing()
 # vis.create_window()
