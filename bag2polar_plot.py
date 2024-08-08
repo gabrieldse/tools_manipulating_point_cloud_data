@@ -27,25 +27,6 @@ bagpath = Path('/home/gabriel/Desktop/uniburger/data/unilidar-2023-09-22-12-42-0
 # Create a type store to use if the bag has no message definitions.
 typestore = get_typestore(Stores.ROS1_NOETIC)
 
-offsets = {
-    'x': 0,
-    'y': 4,
-    'z': 8,
-    'intensity': 12,
-    'ring': 16,
-    'time': 20
-}
-
-# Define data types
-data_types = {
-    'x': 'f',  # FLOAT32
-    'y': 'f',  # FLOAT32
-    'z': 'f',  # FLOAT32
-    'intensity': 'f',  # FLOAT32
-    'ring': 'H',  # UINT16
-    'time': 'f'  # FLOAT32
-}
-
 def print_point_data(data):
     print("Point 1 start -----")
     
