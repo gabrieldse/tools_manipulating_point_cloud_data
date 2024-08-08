@@ -4,30 +4,19 @@
 python3 -m pip install -r requirements.txt
 ```
 
-Process:
-1. data analysis - bag to pcd
-2. manual selection - pcd ply
-3. find_plane (via o3d) 
-4. plot plane
-5. 
-
-4. python3 find_plane.py file_plane_1m_137_147.ply
-
-RESALVAS:
-
-OBS: I have to add the plane on 0 (at least center, maybe base to be more realistic)
-
-# Analyse Data
-
-# Select frames
-    # .bag to .pcd
-    # roscore
-    # rosbag reindex P23_71.9_vert_2024-08-02-08-04-06.bag.active 
-    # rosrun pcl_ros bag_to_pcd P23_71.9_vert_2024-08-02-08-04-06.bag.active /unilidar/cloud ./folder_of_pcd
+# ROSBAG 2 .pcd of each frame 
+You need to have and source ROS1 for this step
+```
+roscore & rosrun pcl_ros bag_to_pcd <file_name> <topic_name=/unilidar/cloud> <output_name>
+```
 
 # Merge pcd's
+python3 combine_pcds_in_folder.py <folder_path> <output_file_name>
 
-# Crop plane
+
+# Useful:
+
+VSCODE extension to visualize .pcd files: pcd-viewer
 
 
-# Perform plane analysis (find gaussian noise and plot it)
+

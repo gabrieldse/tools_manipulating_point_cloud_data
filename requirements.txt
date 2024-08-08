@@ -2,5 +2,6 @@ numpy
 matplotlib
 pandas
 open3d
-# roslibpy
+pypcd4
+# maybe not used:
 rosbags
