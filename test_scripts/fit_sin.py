@@ -58,7 +58,7 @@ print(f"idex based results: {results}")
 print(f"time based results: {results_time}")
 fit_function = results["fitfunc"]
 
-A = 44
+A = 42.9612
 w = 0.05524759249504118
 p = 1.7952215857902365
 c = 44.80487438155387

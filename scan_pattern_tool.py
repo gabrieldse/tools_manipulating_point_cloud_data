@@ -254,7 +254,7 @@ if __name__ == '__main__':
     #data = pd.read_csv('livox_indoor_1_scans_with_polar.csv', delimiter=',', nrows=20000)
     # data = converted_data
     # animate_xyz_df(data, args.skip_points)
-    data = pd.read_csv('/home/gabriel/Desktop/uniburger/output_data.csv',delimiter=',',nrows=2100)
+    data = pd.read_csv('/home/sqdr/ROSDOCKER/noetic/src/point_lio_ws/data_filtering/data/output_data.csv',delimiter=',',nrows=2100)
     animate_polar_df(data, args.skip_points)
 
     #Plot scan patter in polar

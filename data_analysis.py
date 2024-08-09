@@ -8,7 +8,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.stats import norm
 import matplotlib.mlab as mlab
-
+from scipy.optimize import curve_fit
 
 def load_point_clouds(directory):
     ''' It gets only pcd points from a specific time frame '''
@@ -149,7 +149,13 @@ def combine_point_clouds_with_intensity(pcd_paths, save_pcd_file_as):
     return pcd_combined
 
 def plot_point_cloud_with_plane(ply_file, a, b, c, d):
-    print(f'---------- {ply_file}---------------------')
+    ply_directory = os.path.dirname(ply_file)
+    file_name, file_extension = os.path.splitext(os.path.basename(ply_file))
+    print(f'---------- {file_name}---------------------')
+
+    print(f"Plane equation: {a:.2f}x + {b:.2f}y + {c:.2f}z + {d:.2f} = 0")
+    D = (np.abs(d))/np.sqrt(a**2+b**2+c**2)
+    print(f"Distance LiDAR to the plane : {D:.2f} meters ")
     
     # Load the point cloud using Open3D
     pcd = o3d.io.read_point_cloud(ply_file)
@@ -172,6 +178,7 @@ def plot_point_cloud_with_plane(ply_file, a, b, c, d):
     ax.plot_surface(X, Y, Z, color='r', alpha=0.5)
 
     # Set labels
+    ax.set_title(f'Plane a = {a:.2f}, b = {b:.2f}, c = {c:.2f}, d = {d:.2f} \n fit on {file_name} \n Distance to lidar = {D:.2f}')
     ax.set_xlabel('X')
     ax.set_ylabel('Y')
     ax.set_zlabel('Z')
@@ -188,50 +195,67 @@ def plot_point_cloud_with_plane(ply_file, a, b, c, d):
     ax.set_ylim(mid_y - max_range / 2, mid_y + max_range / 2)
     ax.set_zlim(mid_z - max_range / 2, mid_z + max_range / 2)
 
-    plt.show()
+    #plt.show()
     
 
-# 0.0001 = 1/10 mm
-def calculate_gaussian_noise(ply_file, a, b, c, d, threshold=1):
-    
+# Define the Gaussian function
+def gaussian(x, mu, sigma):
+    return norm.pdf(x, mu, sigma)
+
+def calculate_gaussian_noise(ply_file, a, b, c, d):
+    ply_directory = os.path.dirname(ply_file)
+    file_name, file_extension = os.path.splitext(os.path.basename(ply_file))
+
     # Load the point cloud
     pcd = o3d.io.read_point_cloud(ply_file)
     points = np.asarray(pcd.points)
 
     # Compute distances from the plane
-    distances_abs = np.abs(a * points[:, 0] + b * points[:, 1] + c * points[:, 2] + d) / np.sqrt(a**2 + b**2 + c**2)
     distances = (a * points[:, 0] + b * points[:, 1] + c * points[:, 2] + d) / np.sqrt(a**2 + b**2 + c**2)
+    distances_cm = distances * 100
 
-    # Filter points within 1 cm (0.01 meters) of the plane
-    within_threshold = distances_abs < threshold
-    points_within_threshold = points[within_threshold]
-    distances_within_threshold = distances_abs[within_threshold]
+
 
     # Compute the Gaussian noise
-    if len(distances_within_threshold) > 0:
-        mean_distance = np.mean(distances_within_threshold)
-        std_distance = np.std(distances_within_threshold)
-        print(f"Mean distance to the plane: {100*mean_distance:.4f} centimetres")
-        print(f"Standard deviation (noise) of distances: {std_distance:.4f} ***** value ")
-        
-        # TODO fit a gaussian
-        # bins = np.linspace(0,1,200)
-        # (mu, sigma) = norm.fit(distances_within_threshold)
-        # y = norm.pdf( bins, mu, sigma)
-        # plt.figure(figsize=(10, 6))
-        # l = plt.plot(bins/ 100, y, 'r--', linewidth=3)
+    if len(distances_cm) > 0:
+        bins = 100
 
-        print(f'------------------------------------------------------------------------------------')
-        # Plot the distances
-        plt.hist(distances*100, bins=100, edgecolor='black',density=True)
-        plt.title(f' {ply_file} ')
+        # Histogram of distances
+        counts, bin_edges = np.histogram(distances_cm, bins=bins, density=True)
+        bin_centers = 0.5 * (bin_edges[1:] + bin_edges[:-1])
+
+        # Fit the Gaussian function to the histogram
+        popt, pcov = curve_fit(gaussian, bin_centers, counts, p0=[np.mean(distances_cm), np.std(distances_cm)])
+        mu_fitted, sigma_fitted = popt
+
+        print(f"Fitted mean distance of points to the plane: {mu_fitted:.4f} centimetres")
+        print(f"Fitted standard deviation (noise) of distances: {sigma_fitted:.4f}")
+        print(f"(Previous guessed standard deviation (noise) of distances: {np.std(distances_cm):.4f})")
+
+        # Plot the distances and the fitted Gaussian
+        plt.figure(figsize=(10, 6))
+        plt.hist(distances_cm, bins=bins, edgecolor='black', density=True, alpha=0.6, label='Histogram of distances')
+
+        # Plot the guess Gaussian curve
+        x = np.linspace(np.min(distances_cm), np.max(distances_cm), 1000)
+        p = gaussian(x, np.mean(distances_cm), np.std(distances_cm))
+        plt.plot(x, p, 'r--', linewidth=3, label=f'Guessed Gaussian \n \u03C3 = {np.std(distances_cm):.2f} \n \u03BC = {np.mean(distances_cm):.2f} ')
+
+        # Plot the fitted Gaussian curve
+        p = gaussian(x, mu_fitted, sigma_fitted)
+        plt.plot(x, p, 'g--', linewidth=3, label=f'Fitted Gaussian \n \u03C3 = {sigma_fitted:.2f} \n \u03BC = {mu_fitted:.2f} ')
+
+        plt.title(f'{file_name}')
         plt.xlabel('Distance (cm)')
-        plt.ylabel('Number of Points')
+        plt.ylabel('Density')
+        plt.legend()
         plt.grid(True)
+        base_name, extension = os.path.splitext(ply_file)
         plt.show()
 
     else:
         print("No points within the specified threshold.")
+
 
 # TODO initialize folder structure
 
@@ -246,7 +270,7 @@ bag_folder = 'filtered_data/bag'
 bag_reindexed_folder = 'filtered_data/bag/reindexed'
 pcd_directory = 'filtered_data/pcd'
 pcd_combined_folder = 'filtered_data/pcd_combined'
-ply_directory = "filtered_data/ply"
+ply_directory = "/home/sqdr/ROSDOCKER/noetic/src/point_lio_ws/data_filtering/data/filtered_data/ply"
 
 
 # file_names = [f for f in os.listdir(bag_folder) if f.endswith('.bag.active')] 
@@ -308,21 +332,34 @@ Fuse diferent frames
 
 # -------------------- FIND PLANE and PLOT Noise distribution ------------------------------
 
-# ply_files = [f for f in os.listdir(ply_directory)] 
-# print(ply_files)
-# for ply_file in ply_files:
-#     ply_file_name = os.path.join(ply_directory,ply_file)
-#     ply = o3d.io.read_point_cloud(ply_file_name)
-#     # ply_file_name = "ply/P23_71.9_vert.ply"
-#     # ply = o3d.io.read_point_cloud("ply/P23_71.9_vert.ply")
-#     print(ply)
+############### Example for a whole folder:
+ply_files = [f for f in os.listdir(ply_directory)] 
+print(ply_files)
+for ply_file in ply_files:
+    ply_file_name = os.path.join(ply_directory,ply_file)
+    ply = o3d.io.read_point_cloud(ply_file_name)
+    # ply_file_name = "ply/P23_71.9_vert.ply"
+    # ply = o3d.io.read_point_cloud("ply/P23_71.9_vert.ply")
+    print(ply)
 
-#     # Segment the plane TODO - change name of graph
-#     plane_model, inliers = ply.segment_plane(distance_threshold=0.02, ransac_n=3, num_iterations=100) # 0.02 = 2 cm
-#     [a, b, c, d] = plane_model
-#     print(f"Plane equation: {a:.2f}x + {b:.2f}y + {c:.2f}z + {d:.2f} = 0")
-#     plot_point_cloud_with_plane(ply_file_name, a, b, c, d)
-#     calculate_gaussian_noise(ply_file_name, a, b, c, d, threshold=1)  # Threshold is 1 cm
+    # Segment the plane TODO - change name of graph
+    plane_model, inliers = ply.segment_plane(distance_threshold=0.02, ransac_n=3, num_iterations=100) # 0.02 = 2 cm
+    [a, b, c, d] = plane_model
+    print(f"Plane equation: {a:.2f}x + {b:.2f}y + {c:.2f}z + {d:.2f} = 0")
+    plot_point_cloud_with_plane(ply_file_name, a, b, c, d)
+    calculate_gaussian_noise(ply_file_name, a, b, c, d)  # Threshold is 1 cm
+
+# ############## Example for a single file:
+# ply_path = "data/filtered_data/ply/72.7parking_contre_solei_blanche_74.7_2024-08-02-07-53-28.ply"
+# ply_directory = os.path.dirname(ply_path)
+# file_name, file_extension = os.path.splitext(os.path.basename(ply_path))
+
+# ply = o3d.io.read_point_cloud(ply_path)
+# # Threshold at 2 meters so it wont filter any points, as the planes are already croped
+# plane_model, inliers = ply.segment_plane(distance_threshold=2, ransac_n=3, num_iterations=100) 
+# [a, b, c, d] = plane_model
+# plot_point_cloud_with_plane(ply_path, a, b, c, d)
+# calculate_gaussian_noise(ply_path, a, b, c, d)  # Threshold is 1 cm
 
 #ref next approach
 #ref como talvez usa pose graph https://www.open3d.org/docs/latest/tutorial/Advanced/multiway_registration.html
