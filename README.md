@@ -15,7 +15,14 @@ python3 combine_pcds_in_folder.py <folder_path> <output_file_name>
 
 # Heatmap of FOV from csv (the csv need the azimuth and zenith columns)
 ```
-python3 fov_heatmap.py <path_to_csv>  <number_of_individual_sacns> --threshold <thershold>
+python3 fov_heatmap.py <path_to_csv>  <number_of_individual_sacns> --threshold <thershold> --no_plot 
+```
+the --no_plot is optional
+
+# Average angular gap
+todo: pass path as argument
+```
+python3 fov_2_average_gap.py
 ```
 
 # Plane fit and gaussian noise distribution:
