@@ -40,20 +40,48 @@ plt.show()
 
 
 # Signal-to-noise ratio
+sigma_haut = [7.96, 6.86, 4.85, 5.25]
+lux_haut = [0, 76, 72.2, 73.5]
+dist_haut = [19.95, 17.64, 7.37,  14.1 ]
+dist_haut_aprox_measured = [21.952, 20.075, 0, 0,  ]
 
-sigma = [2.87, 1.34, 10.29, 1.1, 5.25, 7, 4.85, 1.91, 2.78]
-dist = [7.03, 4.22, 36.72, 4.25, 14.1, 29.03, 7.37, 2.6, 14.1]
-coefficients = np.polyfit(dist, sigma, 1)
-linear_fit = np.poly1d(coefficients)
+
+sigma_devant = [4.95, 4.81, 12.26, 9.74, 7, 2.78, 1.91, 10.29, 2.87]
+lux_devant = [1.7, 11.4, 9.8, 8, 71.6, 73.3, 70.6, 71.90, 71.9]
+dist_devant = [17.17, 19.85, 34.81, 37.40, 29.03, 14.1,  2.6, 36.72, 7.03]
+dist_devant_aprox_measured = [18.707, 21.724, 40, 42.541, 0, 0, 0, 0, 0]
+# solei branche devant 4.25 m 1.1,devant 4.22m 1.34,
+
+######## # Measures 21
+# sigma_haut = [7.96, 6.86]
+# lux_haut = [0, 76]
+# dist_haut = [19.95, 17.64]
+# dist_haut_aprox_measured = [21.952, 20.075]
+
+
+# sigma_devant = [4.95, 4.81, 12.26, 9.74]
+# lux_devant = [1.7, 11.4, 9.8, 8 ]
+# dist_devant = [17.17, 19.85, 34.81, 37.40 ]
+# dist_devant_aprox_measured = [18.707, 21.724, 40, 42.541, ]
+
+coefficient_devant = np.polyfit(dist_devant, sigma_devant, 1)
+coefficients_haut = np.polyfit(dist_haut, sigma_haut, 1)
+linear_fit_devant =  np.poly1d(coefficient_devant)
+linear_fit_haut =  np.poly1d(coefficients_haut)
 
 # Generate points for the regression line
-dist_fit = np.linspace(min(dist), max(dist), 100)
-sigma_fit = linear_fit(dist_fit)
+dist_fit_devant = np.linspace(min(dist_devant), max(dist_devant), 100)
+dist_fit_haut= np.linspace(min(dist_haut), max(dist_haut), 100)
+sigma_fit_devant = linear_fit_devant(dist_fit_devant)
+sigma_fit_haut = linear_fit_haut(dist_fit_haut)
 
 
 plt.figure()
-plt.plot(dist, sigma, 'ro', label="Measurements")
-plt.plot(dist_fit, sigma_fit, 'b-', label=f'Linear fit: $y = {coefficients[0]:.2f}x + {coefficients[1]:.2f}$')
+plt.plot(dist_devant, sigma_devant, 'ro', label="Measurements devant")
+plt.plot(dist_haut, sigma_haut, 'bo', label="Measurements haut")
+plt.plot(dist_fit_devant, sigma_fit_devant, 'r-', label=f'Linear fit devant : $y = {coefficient_devant[0]:.2f}x + {coefficient_devant[1]:.2f}$')
+plt.plot(dist_fit_haut, sigma_fit_haut, 'b-', label=f'Linear fit haut : $y = {coefficients_haut[0]:.2f}x + {coefficients_haut[1]:.2f}$')
+
 plt.xlabel('Distance to the plane [m]')
 plt.ylabel('Standard deviation [cm]')
 plt.title('Distance x STD \n Signal-to-noise ratio analysis.')

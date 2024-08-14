@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 from scipy.stats import norm
 import matplotlib.mlab as mlab
 from scipy.optimize import curve_fit
+from pypcd4 import PointCloud
 
 def load_point_clouds(directory):
     ''' It gets only pcd points from a specific time frame '''
@@ -266,11 +267,11 @@ def calculate_gaussian_noise(ply_file, a, b, c, d):
 3. Run a command for each filename in the list using the subprocess module.
 '''
 
-bag_folder = 'filtered_data/bag'
-bag_reindexed_folder = 'filtered_data/bag/reindexed'
-pcd_directory = 'filtered_data/pcd'
-pcd_combined_folder = 'filtered_data/pcd_combined'
-ply_directory = "/home/sqdr/ROSDOCKER/noetic/src/point_lio_ws/data_filtering/data/filtered_data/ply"
+bag_folder = '/home/ws/src/point_lio_ws/data_filtering/data/21_august_fill_empty_values_ratio_graph_outdoors'
+bag_reindexed_folder = '/home/ws/src/point_lio_ws/data_filtering/data/21_august_fill_empty_values_ratio_graph_outdoors/reindexed'
+pcd_directory = '/home/sqdr/ROSDOCKER/noetic/src/point_lio_ws/data_filtering/data/21_august_fill_empty_values_ratio_graph_outdoors/pcd'
+pcd_combined_folder = '/home/sqdr/ROSDOCKER/noetic/src/point_lio_ws/data_filtering/data/21_august_fill_empty_values_ratio_graph_outdoors/pcd_combined'
+ply_directory = "/home/sqdr/ROSDOCKER/noetic/src/point_lio_ws/data_filtering/data/21_august_fill_empty_values_ratio_graph_outdoors/ply"
 
 
 # file_names = [f for f in os.listdir(bag_folder) if f.endswith('.bag.active')] 
@@ -308,9 +309,35 @@ Fuse diferent frames
 #     file_names = [f for f in os.listdir(os.path.join(pcd_directory,pcd_data)) ]
 #          # print(f'debug file names: {file_names}')
 #     selected_frames =  crop_pcd_files_within_interval(direction=0,time=5,directory=os.path.join(pcd_directory,pcd_data))
-#     save_pcd_file_as=os.path.join(pcd_combined_folder, pcd_data + '.pcd')
-#     combined_pcd = merge_points(selected_frames,save_pcd_file_as)
-#     pcd_combined_path_list.append(save_pcd_file_as)
+
+#     point_clouds = []
+#     for frame in selected_frames:
+#         try: 
+#             pc = PointCloud.from_path(frame)
+#             array = pc.numpy(("x", "y", "z", "intensity"))
+#             point_clouds.append(PointCloud.from_xyzi_points(array))
+#         except Exception as e:
+#             print(f"Failed to process {frame}: {e}")
+
+#     # Fuse all point clouds
+#     if point_clouds:
+#         fused_pc = point_clouds[0]
+#         for pc in point_clouds[1:]:
+#             fused_pc += pc
+#     else:
+#         raise ValueError("No PCD files found in the specified folder.")
+
+#     # Print fields of the combined point cloud
+#     print(f"Current fields in .pcd : {fused_pc.fields}.")
+#     print("Wait the pcd's are still being combined")
+#     # array =  fused_pc.numpy()
+#     parent_dir = os.path.dirname(pcd_data)
+#     output_path = os.path.join(pcd_combined_folder, pcd_data + '.pcd')
+#     try:
+#         fused_pc.save(output_path)
+#         print(f"Combined PCD file saved to {output_path}")
+#     except Exception as e:
+#         print(f"Failed to save the combined PCD file: {e}")
     
 # print(f"combined pcd : {pcd_combined_path_list}")
 
@@ -332,7 +359,7 @@ Fuse diferent frames
 
 # -------------------- FIND PLANE and PLOT Noise distribution ------------------------------
 
-############### Example for a whole folder:
+############## Example for a whole folder:
 ply_files = [f for f in os.listdir(ply_directory)] 
 print(ply_files)
 for ply_file in ply_files:

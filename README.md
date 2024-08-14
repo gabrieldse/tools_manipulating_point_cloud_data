@@ -5,7 +5,7 @@ python3 -m pip install -r requirements.txt
 ```
 
 # ROSBAG 2 .pcd of each frame 
-You need to have and source ROS1 for this step
+You need to have and source ROS1 for this step. And do "rosbag reindex *.bag.active" if the rosbags are correctly indexed
 ```
 roscore & rosrun pcl_ros bag_to_pcd <file_name> <topic_name=/unilidar/cloud> <output_name>
 ```
