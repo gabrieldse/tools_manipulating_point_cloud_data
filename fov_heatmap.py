@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import argparse
 
-def process_data(file_path, nscans, threshold, show_plots):
+def calculate_fov(file_path, nscans, threshold, show_plots):
     # Read the CSV file
     scan_points_total = 2160 * nscans
     df = pd.read_csv(file_path, delimiter=',', nrows=scan_points_total)
@@ -60,12 +60,14 @@ def process_data(file_path, nscans, threshold, show_plots):
         
         # Plot the FOV coverage
         plt.figure()
-        plt.plot(range(1, len(fov_per) + 1), fov_per)
+        plt.plot(np.linspace(1, nscans/10,len(fov_per)), fov_per)
         plt.title(f'FOV coverage after {len(fov_per)/10} seconds')
-        plt.xlabel('Scan Index')
+        plt.xlabel('Seconds ')
         plt.ylabel('Coverage [%]')
         plt.grid()
+        plt.ylim(0, 100)
         plt.show()
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Process scan data and plot results.')
@@ -79,4 +81,4 @@ if __name__ == '__main__':
     # Determine if plotting should be shown
     show_plots = not args.no_plot
 
-    process_data(args.file_path, args.nscans, args.threshold, show_plots)
+    calculate_fov(args.file_path, args.nscans, args.threshold, show_plots)

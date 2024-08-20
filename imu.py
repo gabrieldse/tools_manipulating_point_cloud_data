@@ -33,7 +33,7 @@ def main(args):
     """""""""""""""""""""""""""""
     " IMU data  Directory Path  "
     """""""""""""""""""""""""""""
-    extractDataPath = "/home/ws/src/point_lio_ws/data_filtering/data/IMU" # expanduser("~") + '/imu_data_raw/'
+    extractDataPath = "/home/ws/src/data_lidar/filtered_data/2AUG_parking/imu" # expanduser("~") + '/imu_data_raw/'
     if not os.path.isdir(extractDataPath):
         os.mkdir(extractDataPath)
 
@@ -110,36 +110,39 @@ def main(args):
     plt.figure(figsize=(12, 8))
 
     # Plot each sensor's data against time
-    plt.subplot(3, 1, 1)
+    plt.subplot(2, 1, 1)
     plt.plot(time, ax, label='Ax', color='r')
     plt.plot(time, ay, label='Ay', color='g')
     plt.plot(time, az, label='Az', color='b')
-    plt.xlabel('Time')
-    plt.ylabel('Acceleration')
+    plt.xlabel('Time [s]')
+    plt.ylabel('Acceleration [m/s2]')
     plt.title('Acceleration vs Time')
     plt.legend()
+    plt.ylim(-5, +5)
 
-    plt.subplot(3, 1, 2)
+    plt.subplot(2, 1, 2)
     plt.plot(time, gx, label='Gx', color='r')
     plt.plot(time, gy, label='Gy', color='g')
     plt.plot(time, gz, label='Gz', color='b')
-    plt.xlabel('Time')
-    plt.ylabel('Angular Velocity')
+    plt.xlabel('Time [s]')
+    plt.ylabel('Angular Velocity [degrees/s***]')
     plt.title('Angular Velocity vs Time')
     plt.legend()
+    plt.ylim(-0.10, +0.10)
 
-    plt.subplot(3, 1, 3)
-    plt.plot(time, ax, label='Ax', color='r', alpha=0.5)
-    plt.plot(time, ay, label='Ay', color='g', alpha=0.5)
-    plt.plot(time, az, label='Az', color='b', alpha=0.5)
-    plt.plot(time, gx, label='Gx', color='r', linestyle='--')
-    plt.plot(time, gy, label='Gy', color='g', linestyle='--')
-    plt.plot(time, gz, label='Gz', color='b', linestyle='--')
-    plt.grid()
-    plt.xlabel('Time')
-    plt.ylabel('Combined Data')
-    plt.title('Combined Plot')
-    plt.legend()
+
+    # plt.subplot(3, 1, 3)
+    # plt.plot(time, ax, label='Ax', color='r', alpha=0.5)
+    # plt.plot(time, ay, label='Ay', color='g', alpha=0.5)
+    # plt.plot(time, az, label='Az', color='b', alpha=0.5)
+    # plt.plot(time, gx, label='Gx', color='r', linestyle='--')
+    # plt.plot(time, gy, label='Gy', color='g', linestyle='--')
+    # plt.plot(time, gz, label='Gz', color='b', linestyle='--')
+    # plt.grid()
+    # plt.xlabel('Time')
+    # plt.ylabel('Combined Data')
+    # plt.title('Combined Plot')
+    # plt.legend()
 
     # Adjust layout
     plt.tight_layout()
@@ -169,7 +172,7 @@ def main(args):
     plt.figure(figsize=(12, 8))
 
     # Plot Fourier Transforms
-    plt.subplot(3, 1, 1)
+    plt.subplot(2, 1, 1)
     plt.plot(xf, 2.0/N * np.abs(yf_ax[:N//2]), label='Ax', color='r')
     plt.plot(xf, 2.0/N * np.abs(yf_ay[:N//2]), label='Ay', color='g')
     plt.plot(xf, 2.0/N * np.abs(yf_az[:N//2]), label='Az', color='b')
@@ -177,8 +180,10 @@ def main(args):
     plt.ylabel('Amplitude')
     plt.title('Acceleration Frequency Spectrum')
     plt.legend()
+    # plt.xlim(1, 4)
+    # plt.ylim(1, 16)
 
-    plt.subplot(3, 1, 2)
+    plt.subplot(2, 1, 2)
     plt.plot(xf, 2.0/N * np.abs(yf_gx[:N//2]), label='Gx', color='r')
     plt.plot(xf, 2.0/N * np.abs(yf_gy[:N//2]), label='Gy', color='g')
     plt.plot(xf, 2.0/N * np.abs(yf_gz[:N//2]), label='Gz', color='b')
@@ -186,18 +191,20 @@ def main(args):
     plt.ylabel('Amplitude')
     plt.title('Angular Velocity Frequency Spectrum')
     plt.legend()
+    # plt.xlim(1, 4)
+    # plt.ylim(1, 16)
 
-    plt.subplot(3, 1, 3)
-    plt.plot(xf, 2.0/N * np.abs(yf_ax[:N//2]), label='Ax', color='r', alpha=0.5)
-    plt.plot(xf, 2.0/N * np.abs(yf_ay[:N//2]), label='Ay', color='g', alpha=0.5)
-    plt.plot(xf, 2.0/N * np.abs(yf_az[:N//2]), label='Az', color='b', alpha=0.5)
-    plt.plot(xf, 2.0/N * np.abs(yf_gx[:N//2]), label='Gx', color='r', linestyle='--')
-    plt.plot(xf, 2.0/N * np.abs(yf_gy[:N//2]), label='Gy', color='g', linestyle='--')
-    plt.plot(xf, 2.0/N * np.abs(yf_gz[:N//2]), label='Gz', color='b', linestyle='--')
-    plt.xlabel('Frequency (Hz)')
-    plt.ylabel('Combined Amplitude')
-    plt.title('Combined Frequency Spectrum')
-    plt.legend()
+    # plt.subplot(3, 1, 3)
+    # plt.plot(xf, 2.0/N * np.abs(yf_ax[:N//2]), label='Ax', color='r', alpha=0.5)
+    # plt.plot(xf, 2.0/N * np.abs(yf_ay[:N//2]), label='Ay', color='g', alpha=0.5)
+    # plt.plot(xf, 2.0/N * np.abs(yf_az[:N//2]), label='Az', color='b', alpha=0.5)
+    # plt.plot(xf, 2.0/N * np.abs(yf_gx[:N//2]), label='Gx', color='r', linestyle='--')
+    # plt.plot(xf, 2.0/N * np.abs(yf_gy[:N//2]), label='Gy', color='g', linestyle='--')
+    # plt.plot(xf, 2.0/N * np.abs(yf_gz[:N//2]), label='Gz', color='b', linestyle='--')
+    # plt.xlabel('Frequency (Hz)')
+    # plt.ylabel('Combined Amplitude')
+    # plt.title('Combined Frequency Spectrum')
+    # plt.legend()
 
     # Adjust layout
     plt.tight_layout()

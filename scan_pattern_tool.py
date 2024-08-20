@@ -6,35 +6,21 @@ from matplotlib.animation import FuncAnimation
 import argparse
 import scipy.optimize # for sin fit
 
-'''
-
-
-'''
 ''' Animate the x,y,z rows of a data frame '''
 def animate_xyz_df(data, skip_points,nrows=20000):
     # Read the CSV file
-    data = data
+    data = pd.read_csv(data)
     pd.options.display.max_columns = None
     # print(data.head())
 
-    # print(only_points_coord.head())
     # print(only_points_coord.min())
     # print(only_points_coord.max())
 
     # Extract columns
-    if 'Time/s' in data.columns:
-        time = data['Time/s']
-        azimuth = data['Azimuth/deg']
-        zenith = data['Zenith/deg']
-    elif 'x' in data.columns:
-        time = data['x']
-        azimuth = data['y']
-        zenith = data['z']
-    elif 'X'  in data.columns:
-        time = data['X']
-        azimuth = data['Y']
-        zenith = data['Z']
-        
+
+    time = data['x']
+    azimuth = data['y']
+    zenith = data['z']
 
     # Function to update the plot with skipped points
     def update_plot(skip_points):
@@ -83,10 +69,10 @@ def animate_xyz_df(data, skip_points,nrows=20000):
 ''' Animate the zenith and azimuth rows of a data frame '''
 def animate_polar_df(data, skip_points,nrows=20000):
     # Read the CSV file
-    data = data
+    data = pd.read_csv(data,nrows=nrows)
     azimuth = data['azimuth']
     zenith = data['zenith']
-    time = data['index']
+    index = data['index']
 
     #convert to cartesian (R=1 for normalization)
     r = 30
@@ -105,6 +91,7 @@ def animate_polar_df(data, skip_points,nrows=20000):
         x_skipped = x[::skip_points]
         y_skipped = y[::skip_points]
         z_skipped = z[::skip_points]
+        index_skipped = index[::skip_points]
 
         # Set up the figure and 3D axis
         fig = plt.figure()
@@ -126,16 +113,18 @@ def animate_polar_df(data, skip_points,nrows=20000):
 
         # Initialize the point cloud
         point_cloud, = ax.plot([], [], [], 'ro',markersize=4)
+        
 
         # Update function for animation
         def update(frame):
             # Update the point cloud data
             point_cloud.set_data( x_skipped[:frame+1], y_skipped[:frame+1])
             point_cloud.set_3d_properties(z_skipped[:frame+1])
+            print(index[index_skipped[:frame+1]])
             return point_cloud,
 
         # Create the animation
-        ani = FuncAnimation(fig, update, frames=len(x_skipped), interval=10, blit=True)
+        ani = FuncAnimation(fig, update, frames=len(x_skipped), interval=1, blit=True)
         # Show the plot
         plt.show()
 
@@ -254,11 +243,12 @@ if __name__ == '__main__':
     #data = pd.read_csv('livox_indoor_1_scans_with_polar.csv', delimiter=',', nrows=20000)
     # data = converted_data
     # animate_xyz_df(data, args.skip_points)
-    data = pd.read_csv('/home/sqdr/ROSDOCKER/noetic/src/point_lio_ws/data_filtering/data/output_data.csv',delimiter=',',nrows=2100)
-    animate_polar_df(data, args.skip_points)
+    # data = pd.read_csv('/home/sqdr/ROSDOCKER/noetic/src/point_lio_ws/data_filtering/data/output_data.csv',delimiter=',',nrows=2100)
+    # animate_polar_df(data, args.skip_points)
 
     #Plot scan patter in polar
     '''for know I have to add the 'index' as the first column's name'''
     # data = pd.read_csv(args.file_path, delimiter=',', nrows=args.nrows)
-    plot_polar_scan_patter(data)
+    #plot_polar_scan_patter()
+    animate_polar_df(args.file_path, args.skip_points, args.nrows)
 

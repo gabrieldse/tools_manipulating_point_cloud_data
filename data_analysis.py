@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 from scipy.stats import norm
 import matplotlib.mlab as mlab
 from scipy.optimize import curve_fit
-from pypcd4 import PointCloud
+#from pypcd4 import PointCloud
 
 def load_point_clouds(directory):
     ''' It gets only pcd points from a specific time frame '''
@@ -198,7 +198,6 @@ def plot_point_cloud_with_plane(ply_file, a, b, c, d):
 
     #plt.show()
     
-
 # Define the Gaussian function
 def gaussian(x, mu, sigma):
     return norm.pdf(x, mu, sigma)
@@ -360,33 +359,33 @@ Fuse diferent frames
 # -------------------- FIND PLANE and PLOT Noise distribution ------------------------------
 
 ############## Example for a whole folder:
-ply_files = [f for f in os.listdir(ply_directory)] 
-print(ply_files)
-for ply_file in ply_files:
-    ply_file_name = os.path.join(ply_directory,ply_file)
-    ply = o3d.io.read_point_cloud(ply_file_name)
-    # ply_file_name = "ply/P23_71.9_vert.ply"
-    # ply = o3d.io.read_point_cloud("ply/P23_71.9_vert.ply")
-    print(ply)
+# ply_files = [f for f in os.listdir(ply_directory)] 
+# print(ply_files)
+# for ply_file in ply_files:
+# ply_file_name = os.path.join(ply_directory,ply_file)
+# ply = o3d.io.read_point_cloud(ply_file_name)
+# # ply_file_name = "ply/P23_71.9_vert.ply"
+# # ply = o3d.io.read_point_cloud("ply/P23_71.9_vert.ply")
+# print(ply)
 
-    # Segment the plane TODO - change name of graph
-    plane_model, inliers = ply.segment_plane(distance_threshold=0.02, ransac_n=3, num_iterations=100) # 0.02 = 2 cm
-    [a, b, c, d] = plane_model
-    print(f"Plane equation: {a:.2f}x + {b:.2f}y + {c:.2f}z + {d:.2f} = 0")
-    plot_point_cloud_with_plane(ply_file_name, a, b, c, d)
-    calculate_gaussian_noise(ply_file_name, a, b, c, d)  # Threshold is 1 cm
-
-# ############## Example for a single file:
-# ply_path = "data/filtered_data/ply/72.7parking_contre_solei_blanche_74.7_2024-08-02-07-53-28.ply"
-# ply_directory = os.path.dirname(ply_path)
-# file_name, file_extension = os.path.splitext(os.path.basename(ply_path))
-
-# ply = o3d.io.read_point_cloud(ply_path)
-# # Threshold at 2 meters so it wont filter any points, as the planes are already croped
-# plane_model, inliers = ply.segment_plane(distance_threshold=2, ransac_n=3, num_iterations=100) 
+# # Segment the plane TODO - change name of graph
+# plane_model, inliers = ply.segment_plane(distance_threshold=0.02, ransac_n=3, num_iterations=100) # 0.02 = 2 cm
 # [a, b, c, d] = plane_model
-# plot_point_cloud_with_plane(ply_path, a, b, c, d)
-# calculate_gaussian_noise(ply_path, a, b, c, d)  # Threshold is 1 cm
+# print(f"Plane equation: {a:.2f}x + {b:.2f}y + {c:.2f}z + {d:.2f} = 0")
+# plot_point_cloud_with_plane(ply_file_name, a, b, c, d)
+# calculate_gaussian_noise(ply_file_name, a, b, c, d)  # Threshold is 1 cm
+
+############### Example for a single file:
+ply_path = '/home/ws/src/data_lidar/filtered_data/2AUG_parking/ply/hand_vert_71.6_2024-08-02-08-01-45.ply'
+ply_directory = os.path.dirname(ply_path)
+file_name, file_extension = os.path.splitext(os.path.basename(ply_path))
+
+ply = o3d.io.read_point_cloud(ply_path)
+# Threshold at 2 meters so it wont filter any points, as the planes are already croped
+plane_model, inliers = ply.segment_plane(distance_threshold=2, ransac_n=3, num_iterations=100) 
+[a, b, c, d] = plane_model
+plot_point_cloud_with_plane(ply_path, a, b, c, d)
+calculate_gaussian_noise(ply_path, a, b, c, d)  # Threshold is 1 cm
 
 #ref next approach
 #ref como talvez usa pose graph https://www.open3d.org/docs/latest/tutorial/Advanced/multiway_registration.html
