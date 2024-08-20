@@ -67,10 +67,12 @@ def main(args):
             time_sample[2, cnt] = current_time_seconds - initial_time_seconds
             
             avgSampleRate += time_sample[1, cnt]
+            print(avgSampleRate)
         cnt += 1
 
     if cnt > 1:
         sampleRate = avgSampleRate / (cnt - 1)
+        print(sampleRate)
     else:
         sampleRate = 0
 
@@ -156,9 +158,12 @@ def main(args):
     
     # Fourier Transform
     fs = 1 / sampleRate  # Sampling frequency
+    fs = 227
+    
     
     # Calculate Fourier Transform
     N = len(time)
+
     T = time[1] - time[0]  # Sampling interval
     yf_ax = fft(ax.to_numpy()-(ax.to_numpy()).mean())
     yf_ay = fft(ay.to_numpy()-(ay.to_numpy()).mean())
@@ -168,6 +173,7 @@ def main(args):
     yf_gz = fft(gz.to_numpy()-(gz.to_numpy()).mean())
     xf = fftfreq(N, T)[:N//2]
 
+    print(f"fs = {fs}. sampleRate={sampleRate}. N = {N}. time={time}, T={T}")
     # Create a new figure for the frequency-domain plots
     plt.figure(figsize=(12, 8))
 
