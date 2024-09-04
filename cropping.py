@@ -1,6 +1,6 @@
 import open3d as o3d
 
-pcd = o3d.io.read_point_cloud("data/multiway_registration.pcd")
+pcd = o3d.io.read_point_cloud("/home/sqdr/ROSDOCKER/noetic/src/data_lidar/filtered_data/2AUG_parking/pcd_combined_with_intensity/ombre blanc.pcd")
 
 # Visualize and create a SelectionPolygonVolume
 # vis = o3d.visualization.VisualizerWithEditing()

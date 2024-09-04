@@ -32,7 +32,7 @@ def demo_crop_geometry():
     print("6) Press 'F' to switch to freeview mode")
 
     # pcd_data = o3d.data.DemoICPPointClouds()
-    pcd = o3d.io.read_point_cloud('scans.pcd')
+    pcd = o3d.io.read_point_cloud('/home/sqdr/ROSDOCKER/noetic/src/data_lidar/filtered_data/2AUG_parking/pcd_combined_with_intensity/ombre blanc.pcd')
 
     # pcd = o3d.io.read_point_cloud(pcd_data.paths[0])
 

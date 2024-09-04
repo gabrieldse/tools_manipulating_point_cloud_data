@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 from scipy.stats import norm
 import matplotlib.mlab as mlab
 from scipy.optimize import curve_fit
-#from pypcd4 import PointCloud
+from pypcd4 import PointCloud
 
 def load_point_clouds(directory):
     ''' It gets only pcd points from a specific time frame '''
@@ -268,8 +268,8 @@ def calculate_gaussian_noise(ply_file, a, b, c, d):
 
 bag_folder = '/home/ws/src/point_lio_ws/data_filtering/data/21_august_fill_empty_values_ratio_graph_outdoors'
 bag_reindexed_folder = '/home/ws/src/point_lio_ws/data_filtering/data/21_august_fill_empty_values_ratio_graph_outdoors/reindexed'
-pcd_directory = '/home/sqdr/ROSDOCKER/noetic/src/point_lio_ws/data_filtering/data/21_august_fill_empty_values_ratio_graph_outdoors/pcd'
-pcd_combined_folder = '/home/sqdr/ROSDOCKER/noetic/src/point_lio_ws/data_filtering/data/21_august_fill_empty_values_ratio_graph_outdoors/pcd_combined'
+pcd_directory = '/home/sqdr/ROSDOCKER/noetic/src/data_lidar/filtered_data/2AUG_parking/pcd'
+pcd_combined_folder = '/home/sqdr/ROSDOCKER/noetic/src/data_lidar/filtered_data/2AUG_parking/pcd_combined_with_intensity'
 ply_directory = "/home/sqdr/ROSDOCKER/noetic/src/point_lio_ws/data_filtering/data/21_august_fill_empty_values_ratio_graph_outdoors/ply"
 
 
@@ -292,53 +292,53 @@ ply_directory = "/home/sqdr/ROSDOCKER/noetic/src/point_lio_ws/data_filtering/dat
     
 # print("All .bag converted to .pcd successfully.")
 
-# ----------------  Multiple PCDs to  Combined PCD -------------------------
+# ----------------  Multiple PCDs to  Combined PCD with intensity -------------------------
 
 '''
 Fuse diferent frames 
 '''
 
-# pcd_directories= [f for f in os.listdir(pcd_directory)] 
-# # file_names_without_extension = [f.replace('.bag.active', '') for f in file_names]
+pcd_directories= [f for f in os.listdir(pcd_directory)] 
+# file_names_without_extension = [f.replace('.bag.active', '') for f in file_names]
 
-# # list of pcds to PCD combined
-# pcd_combined_path_list = []
+# list of pcds to PCD combined
+pcd_combined_path_list = []
 
-# for pcd_data in pcd_directories:
-#     file_names = [f for f in os.listdir(os.path.join(pcd_directory,pcd_data)) ]
-#          # print(f'debug file names: {file_names}')
-#     selected_frames =  crop_pcd_files_within_interval(direction=0,time=5,directory=os.path.join(pcd_directory,pcd_data))
+for pcd_data in pcd_directories:
+    file_names = [f for f in os.listdir(os.path.join(pcd_directory,pcd_data)) ]
+         # print(f'debug file names: {file_names}')
+    selected_frames =  crop_pcd_files_within_interval(direction=0,time=5,directory=os.path.join(pcd_directory,pcd_data))
 
-#     point_clouds = []
-#     for frame in selected_frames:
-#         try: 
-#             pc = PointCloud.from_path(frame)
-#             array = pc.numpy(("x", "y", "z", "intensity"))
-#             point_clouds.append(PointCloud.from_xyzi_points(array))
-#         except Exception as e:
-#             print(f"Failed to process {frame}: {e}")
+    point_clouds = []
+    for frame in selected_frames:
+        try: 
+            pc = PointCloud.from_path(frame)
+            array = pc.numpy(("x", "y", "z", "intensity"))
+            point_clouds.append(PointCloud.from_xyzi_points(array))
+        except Exception as e:
+            print(f"Failed to process {frame}: {e}")
 
-#     # Fuse all point clouds
-#     if point_clouds:
-#         fused_pc = point_clouds[0]
-#         for pc in point_clouds[1:]:
-#             fused_pc += pc
-#     else:
-#         raise ValueError("No PCD files found in the specified folder.")
+    # Fuse all point clouds
+    if point_clouds:
+        fused_pc = point_clouds[0]
+        for pc in point_clouds[1:]:
+            fused_pc += pc
+    else:
+        raise ValueError("No PCD files found in the specified folder.")
 
-#     # Print fields of the combined point cloud
-#     print(f"Current fields in .pcd : {fused_pc.fields}.")
-#     print("Wait the pcd's are still being combined")
-#     # array =  fused_pc.numpy()
-#     parent_dir = os.path.dirname(pcd_data)
-#     output_path = os.path.join(pcd_combined_folder, pcd_data + '.pcd')
-#     try:
-#         fused_pc.save(output_path)
-#         print(f"Combined PCD file saved to {output_path}")
-#     except Exception as e:
-#         print(f"Failed to save the combined PCD file: {e}")
+    # Print fields of the combined point cloud
+    print(f"Current fields in .pcd : {fused_pc.fields}.")
+    print("Wait the pcd's are still being combined")
+    # array =  fused_pc.numpy()
+    parent_dir = os.path.dirname(pcd_data)
+    output_path = os.path.join(pcd_combined_folder, pcd_data + '.pcd')
+    try:
+        fused_pc.save(output_path)
+        print(f"Combined PCD file saved to {output_path}")
+    except Exception as e:
+        print(f"Failed to save the combined PCD file: {e}")
     
-# print(f"combined pcd : {pcd_combined_path_list}")
+print(f"combined pcd : {pcd_combined_path_list}")
 
 
 
@@ -375,17 +375,17 @@ Fuse diferent frames
 # plot_point_cloud_with_plane(ply_file_name, a, b, c, d)
 # calculate_gaussian_noise(ply_file_name, a, b, c, d)  # Threshold is 1 cm
 
-############### Example for a single file:
-ply_path = '/home/ws/src/data_lidar/filtered_data/2AUG_parking/ply/hand_vert_71.6_2024-08-02-08-01-45.ply'
-ply_directory = os.path.dirname(ply_path)
-file_name, file_extension = os.path.splitext(os.path.basename(ply_path))
+# ############### Example for a single file:
+# ply_path = '/home/ws/src/data_lidar/filtered_data/2AUG_parking/ply/hand_vert_71.6_2024-08-02-08-01-45.ply'
+# ply_directory = os.path.dirname(ply_path)
+# file_name, file_extension = os.path.splitext(os.path.basename(ply_path))
 
-ply = o3d.io.read_point_cloud(ply_path)
-# Threshold at 2 meters so it wont filter any points, as the planes are already croped
-plane_model, inliers = ply.segment_plane(distance_threshold=2, ransac_n=3, num_iterations=100) 
-[a, b, c, d] = plane_model
-plot_point_cloud_with_plane(ply_path, a, b, c, d)
-calculate_gaussian_noise(ply_path, a, b, c, d)  # Threshold is 1 cm
+# ply = o3d.io.read_point_cloud(ply_path)
+# # Threshold at 2 meters so it wont filter any points, as the planes are already croped
+# plane_model, inliers = ply.segment_plane(distance_threshold=2, ransac_n=3, num_iterations=100) 
+# [a, b, c, d] = plane_model
+# plot_point_cloud_with_plane(ply_path, a, b, c, d)
+# calculate_gaussian_noise(ply_path, a, b, c, d)  # Threshold is 1 cm
 
 #ref next approach
 #ref como talvez usa pose graph https://www.open3d.org/docs/latest/tutorial/Advanced/multiway_registration.html

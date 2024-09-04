@@ -172,6 +172,15 @@ def main(args):
     yf_gy = fft(gy.to_numpy()-(gy.to_numpy()).mean())
     yf_gz = fft(gz.to_numpy()-(gz.to_numpy()).mean())
     xf = fftfreq(N, T)[:N//2]
+    
+    # T = time[1] - time[0]  # Sampling interval
+    # yf_ax = fft(ax.to_numpy())
+    # yf_ay = fft(ay.to_numpy())
+    # yf_az = fft(az.to_numpy())
+    # yf_gx = fft(gx.to_numpy())
+    # yf_gy = fft(gy.to_numpy())
+    # yf_gz = fft(gz.to_numpy())
+    # xf = fftfreq(N, T)[:N//2]
 
     print(f"fs = {fs}. sampleRate={sampleRate}. N = {N}. time={time}, T={T}")
     # Create a new figure for the frequency-domain plots
